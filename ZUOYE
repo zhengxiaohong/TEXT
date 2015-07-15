@@ -1,0 +1,184 @@
+using System;
+using System.Collections.Generic; using System.ComponentModel; using System.Data; using System.Drawing; using
+
+ System.Text; 
+using System.Windows.Forms; using System.Data.SqlClient;  
+namespace WindowsApplication1 { 
+    public partial class 借阅图书 : Form
+{ 
+        public 借阅图书()         { 
+            InitializeComponent();         }  
+        private void 借阅图书_Load(object sender, EventArgs e)         { 
+            // TODO: 这行代码将数据加载到表“tsglxtDataSet.JHbook”中。您可以根据需要移动或移除
+
+它。             this.jHbookTableAdapter.Fill(this.tsglxtDataSet.JHbook); 
+            // TODO: 这行代码将数据加载到表“tsglxtDataSet.book”中。您可以根据需要移动或移除
+
+它。             this.bookTableAdapter.Fill(this.tsglxtDataSet.book); 
+            // TODO: 这行代码将数据加载到表“tsglxtDataSet.users”中。您可以根据需要移动或移除
+
+它。             this.usersTableAdapter.Fill(this.tsglxtDataSet.users);
+ } 
+        SqlConnection con = new SqlConnection
+
+("Data Source=.;Initial Catalog=tsglxt;Integrated Security=True"); 
+        DataSet ds = new DataSet(); 
+        SqlDataAdapter ada = new SqlDataAdapter
+
+();         BindingSource bs = new BindingSource(); 
+        private void button1_Click(object sender, EventArgs e)         { 
+            string sql = "select * from users where user_id='" + textBox2.Text.Trim
+
+() + "'";             ada.SelectCommand = new SqlCommand
+
+(sql, con);             dataGridView1.DataSource = null;             ada.Fill
+
+(ds, "users");             bs.DataSource = ds;             bs.DataMember = "users"; 
+
+            if (bs.Count <= 0) 
+                MessageBox.Show("表中无此读者"); 
+else
+dataGridView1.DataSource = bs;  
+        }  
+        private void button2_Click(object sender, EventArgs e)         { 
+            string sql = "select * from users where user_name='" + textBox1.Text.Trim
+
+() + "'";             ada.SelectCommand = new SqlCommand
+
+(sql, con);             dataGridView1.DataSource = null;             ada.Fill
+
+(ds, "users");             bs.DataSource = ds;             bs.DataMember = "users"; 
+
+            if (bs.Count <= 0) 
+                MessageBox.Show("表中无此读者");             else 
+                dataGridView1.DataSource = bs;         }  
+        private void button3_Click(object sender, EventArgs e)         { 
+            string sql = "select * from book where book_id='" + textBox3.Text.Trim() + "'";
+  ada.SelectCommand = new SqlCommand
+
+(sql, con);             dataGridView2.DataSource = null;             ada.Fill
+
+(ds, "book");             bs.DataSource = ds;             bs.DataMember = "book";  
+
+           if (bs.Count <= 0) 
+                MessageBox.Show("表中无此图书");             else 
+                dataGridView2.DataSource = bs;         }  
+        private void button4_Click(object sender, EventArgs e)         { 
+            string sql = "select * from book where class='" + comboBox1.SelectedItem.ToString
+
+() + "'";             ada.SelectCommand = new SqlCommand(sql, con); 
+            ada.SelectCommand.Parameters.AddWithValue
+
+("class", comboBox1.Text);             dataGridView2.DataSource = null;             ada.
+
+Fill
+
+(ds, "book");             bs.DataSource = ds;             bs.DataMember = "book";  
+
+           if (bs.Count <= 0) 
+                MessageBox.Show("表中无类别");
+ 
+
+else 
+
+  dataGridView2.DataSource = bs;         }  
+        private void button5_Click(object sender, EventArgs e)         { 
+            string sql = "select * from users"; 
+            ada.SelectCommand = new SqlCommand(sql, con);             ds.Clear(); 
+            ada.Fill
+
+(ds, "users");             bs.DataSource = ds;             bs.DataMember = "users"; 
+
+            dataGridView1.DataSource = bs;         }  
+        private void button6_Click(object sender, EventArgs e)         { 
+            string sql = "select * from book"; 
+            ada.SelectCommand = new SqlCommand(sql, con);             ds.Clear(); 
+            ada.Fill
+
+(ds, "book");             bs.DataSource = ds;             bs.DataMember = "book";  
+
+           dataGridView1.DataSource = bs;         } 
+private void button7_Click(object sender, EventArgs e)         { 
+            string sql = "select kjsl-
+
+yjsl from borrow_reader where user_id='" + textBox1.Text.Trim() + "'"; 
+            SqlCommand cmd = new SqlCommand
+
+(sql, con);             int a = cmd.ExecuteScalar();             if
+
+(a=0)             { 
+                MessageBox.Show("借书数量已满，请还书后再
+
+借！");                 return;             }  
+            string _sql = "select kcsl-jcsl from book where book_id='" + textBox3.Text.Trim
+
+() + "'";             SqlCommand cmd = new SqlCommand
+
+(_sql, con);             int b = cmd.ExecuteScalar();             if
+
+(b=0)             { 
+                MessageBox.Show("此书已全部被借出，不能借
+
+阅");             }             else             {
+string sql = "insert into jhbook(user_id, user_name, book_id, jstime) Values
+
+(@user_id, @user_name, @book_id, @jstime)"; 
+                SqlCommand sqlcmd = new SqlCommand(sql, con); 
+                sqlcmd.Parameters.AddWithValue
+
+("@user_id", textBox1.Text);                 sqlcmd.Parameters.AddWithValue
+
+("@user_name", textBox2.Text);                 sqlcmd.Parameters.AddWithValue
+
+("@book_id", textBox3.Text);                 sqlcmd.Parameters.AddWithValue
+
+("@jstime", dateTimePicker1.Value); 
+                string sqlstr="update  borrow_reader set Yjsl=Yjsl
+
++1 where user_id= @user_id ";                 string _sql="update  book set jcsl=jcsl
+
++1 where book_id= @book_id ";                 SqlCommand cmd = new SqlCommand
+
+(sqlstr, con);                 SqlCommand ddd = new SqlCommand(_sql,con); 
+                cmd.Parameters.AddWithValue
+
+("@user_id", textBox1.Text);                 ddd.Parameters.AddWithValue
+
+("@book_id", textBox3.Text);
+
+°- Marry  you 2015/7/15 21:29:51
+   try                 { 
+                    con.Open(); 
+                    sqlcmd.ExecuteNonQuery
+
+();                     cmd.ExecuteNonQuery
+
+();                     ddd.ExecuteNonQuery
+
+();                     con.Close(); 
+                    MessageBox.Show("借阅成功");                 } 
+                catch (DataException ex) 
+                { MessageBox.Show
+
+(ex.Message); }                 finally                 { 
+                    dataGridView3.DataSource = bs;                 }     
+
+        }            } 
+        private void button8_Click(object sender, EventArgs e)         { 
+            this.Close();         } 
+        private void button9_Click(object sender, EventArgs e)
+   this.Close();         } 
+        private void button9_Click(object sender, EventArgs e)         { 
+            string sql = "select * from book where book_name='" + textBox4.Text.Trim
+
+() + "'";             ada.SelectCommand = new SqlCommand
+
+(sql, con);             dataGridView2.DataSource = null;             ada.Fill
+
+(ds, "book");             bs.DataSource = ds;             bs.DataMember = "book";  
+
+           if (bs.Count <= 0) 
+                MessageBox.Show("表中无此书籍");
+            else 
+                dataGridView2.DataSource = bs;         }     
+}        }
